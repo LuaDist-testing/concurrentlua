@@ -55,7 +55,7 @@ function spawn_system(func, ...)
     local co = coroutine.create(
         function (...)
             coroutine.yield()
-            func(unpack({...}))
+            func(...)
         end
     )
 
@@ -66,7 +66,7 @@ function spawn_system(func, ...)
     concurrent._message.mailboxes[pid] = {}
     concurrent._scheduler.timeouts[pid] = 0
 
-    local status, errmsg = concurrent._process.resume(co, unpack({ ... }))
+    local status, errmsg = concurrent._process.resume(co, ...)
     if not status then
         return nil, errmsg
     end

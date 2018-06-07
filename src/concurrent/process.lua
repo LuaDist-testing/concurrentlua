@@ -13,14 +13,14 @@ function spawn(func, ...)
     local co = coroutine.create(
         function (...)
             coroutine.yield()
-            func(unpack({ ... }))
+            func(...)
             destroy()
         end)
     table.insert(processes, co)
     local pid = #processes
     concurrent._message.mailboxes[pid] = {}
     concurrent._scheduler.timeouts[pid] = 0
-    local status, errmsg = resume(co, unpack({ ... }))
+    local status, errmsg = resume(co, ...)
     if not status then
         return nil, errmsg
     end
@@ -33,7 +33,7 @@ function resume(co, ...)
     if type(co) ~= 'thread' or coroutine.status(co) ~= 'suspended' then
         return
     end
-    local status, errmsg = coroutine.resume(co, unpack({ ... }))
+    local status, errmsg = coroutine.resume(co, ...)
     if not status then
         local pid = whois(co)
         die(pid, errmsg)

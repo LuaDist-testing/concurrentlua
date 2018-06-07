@@ -1,5 +1,3 @@
-VERSION = 1.0.0
-
 DESTDIR = 
 PREFIX = /usr/local
 LIBDIR = $(PREFIX)/lib/lua/5.1
@@ -25,18 +23,16 @@ $(LIB): $(OBJ)
 
 $(OBJ):
 
-install:
+install: all
 	if test ! -d $(DESTDIR)$(LIBDIR); \
 		then mkdir -p $(DESTDIR)$(LIBDIR); \
 	fi
-	cp -f $(LIB) $(DESTDIR)$(LIBDIR)/$(LIB).$(VERSION) && \
-		chmod 0755 $(DESTDIR)$(LIBDIR)/$(LIB).$(VERSION) && \
-		cd $(DESTDIR)$(LIBDIR) && \
-		ln -fs $(LIB).$(VERSION) $(LIB)
+	cp -f $(LIB) $(DESTDIR)$(LIBDIR)/$(LIB) && \
+	chmod 0755 $(DESTDIR)$(LIBDIR)/$(LIB)
 
 uninstall:
 	cd $(DESTDIR)$(LIBDIR) && \
-	    	rm -f $(LIB) $(LIB).$(VERSION)
+	rm -f $(LIB)
 
 clean:
 	rm -f $(OBJ) $(LIB) *~

@@ -54,7 +54,7 @@ function sleep_yield()
         if #mailboxes[s] > 0 then
             break
         end
-        if timeouts[s] and time.time() - timeouts[s] >= 0 then
+        if timeouts[s] and cltime.time() - timeouts[s] >= 0 then
             timeouts[s] = nil
             return
         end

@@ -1,6 +1,6 @@
 DESTDIR = 
 PREFIX = /usr/local
-SHAREDIR = $(PREFIX)/share/lua/5.1/
+SHAREDIR = $(PREFIX)/share/lua/5.1
 SHAREMODDIR = $(SHAREDIR)/concurrent/distributed
 
 SHARE = init.lua \

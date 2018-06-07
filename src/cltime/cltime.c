@@ -37,14 +37,15 @@ cltime_time(lua_State *L)
 	ei.HighPart = eft.dwHighDateTime;
 	ei.LowPart = eft.dwLowDateTime;
 
-	lua_pushnumber(L, (lua_Number)((i.QuadPart - ei.QuadPart) / 10000));
+	lua_pushnumber(L, ((i.QuadPart - ei.QuadPart) / 10000));
 #else
 	struct timeval tv;
 
 	if (gettimeofday(&tv, NULL) != 0)
 		return 0;
 
-	lua_pushnumber(L, (lua_Number)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
+	lua_pushnumber(L, (lua_Number)((unsigned long long int)(tv.tv_sec) * 1000 +
+	    (unsigned long long int)(tv.tv_usec) / 1000));
 #endif
 	return 1;
 }
@@ -57,9 +58,9 @@ cltime_sleep(lua_State *L)
 {
 
 #ifdef _WIN32
-	Sleep(lua_tonumber(L, 1));
+	Sleep((DWORD)(lua_tonumber(L, 1)));
 #else
-	usleep(lua_tonumber(L, 1) * 1000);
+	usleep((useconds_t)(lua_tonumber(L, 1) * 1000));
 #endif
 
 	lua_pop(L, 1);

@@ -50,20 +50,20 @@ function serialize(obj)
     if t == 'nil' or t == 'boolean' or t == 'number' then
         return tostring(obj)
     elseif t == 'string' then
-        return '[[' .. obj .. ']]'
+        return string.format("%q", obj)
     elseif t == 'function' then
         return 'loadstring((mime.unb64([[' .. (mime.b64(string.dump(obj))) ..
             ']])))'
     elseif t == 'table' then
         local t = '{'
         for k, v in pairs(obj) do
-            if type(k) == 'number' then
-                t = t .. ' ' .. serialize(v) .. ', '
+            if type(k) == 'number' or type(k) == 'boolean' then
+                t = t .. ' [' .. tostring(k) .. '] = ' .. serialize(v) .. ','
             else
-                t = t .. ' ' .. tostring(k) .. ' = ' .. serialize(v) .. ', '
+                t = t .. ' ["' .. tostring(k) .. '"] = ' .. serialize(v) .. ','
             end
         end
-        t =  t .. '}'
+        t =  t .. ' }'
         return t 
     else
         error('cannot serialize a ' .. t)

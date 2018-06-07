@@ -30,7 +30,7 @@ end
 
 -- Creates a new process which is also linked to the calling process.
 function spawnlink(...)
-    local pid, errmsg = concurrent.spawn(unpack({ ... }))
+    local pid, errmsg = concurrent.spawn(...)
     if not pid then
         return nil, errmsg
     end

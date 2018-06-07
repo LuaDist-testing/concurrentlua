@@ -23,7 +23,7 @@ end
 
 -- Creates a new process which is also monitored by the calling process.
 function spawnmonitor(...)
-    local pid, errmsg = concurrent.spawn(unpack({ ... }))
+    local pid, errmsg = concurrent.spawn(...)
     if not pid then
         return nil, errmsg
     end

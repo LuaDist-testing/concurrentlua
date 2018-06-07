@@ -8,7 +8,7 @@ all: $(BIN)
 
 $(BIN):
 
-install:	
+install: all
 	if test ! -d $(DESTDIR)$(BINDIR); \
 		then mkdir -p $(DESTDIR)$(BINDIR); \
 	fi

@@ -15,7 +15,7 @@ _whereis = concurrent._register.whereis
 
 -- Registers a PID with the specified name.  If the process is local the old
 -- renamed version of the function is called, otherwise an auxiliary system
--- process, to handle negotiation on the name with ther rest of the nodes, is
+-- process, to handle negotiation on the name with the rest of the nodes, is
 -- created.  Returns true if successful or false otherwise.
 function register(name, pid)
     if not concurrent.node() and not concurrent.getoption('connectall') then
@@ -36,7 +36,7 @@ function register(name, pid)
         concurrent.self(), name, pid)
     local msg = concurrent._scheduler.wait()
     if msg.status then
-        concurrent._register.names[name] = pid
+        concurrent._register.names[name] = { pid, concurrent.node() }
     end
     return msg.status, msg.errmsg
 end
@@ -113,7 +113,7 @@ end
 function controller_register(msg)
     if msg.phase == 'LOCK' then
         if not concurrent.whereis(msg.name) and not nameslocks[msg.name] or
-            cltime.time() - nameslocks[msg.name][stamp] <
+            cltime.time() - nameslocks[msg.name]['stamp'] <
             concurrent.getoption('registerlocktimeout') then
             nameslocks[msg.name] = { pid = msg.pid, node = msg.node,
                 stamp = cltime.time() }
@@ -124,7 +124,7 @@ function controller_register(msg)
         if nameslocks[msg.name] and
             nameslocks[msg.name]['pid'] == msg.pid and
             nameslocks[msg.name]['node'] == msg.node then
-            concurrent._register.register(msg.name, msg.pid)
+            concurrent._register.register(msg.name, { msg.pid, msg.node })
             concurrent.send({ msg.from.pid, msg.from.node }, { phase = 'COMMIT',
                 from = { node = concurrent.node() } })
             nameslocks[msg.name] = nil
@@ -226,7 +226,7 @@ end
 function controller_unregister(msg)
     if msg.phase == 'LOCK' then
         if concurrent.whereis(msg.name) and not nameslocks[msg.name] or
-            cltime.time() - nameslocks[msg.name][stamp] <
+            cltime.time() - nameslocks[msg.name]['stamp'] <
             concurrent.getoption('registerlocktimeout') then
             nameslocks[msg.name] = { pid = msg.pid, node = msg.node,
                 stamp = cltime.time() }
@@ -235,8 +235,8 @@ function controller_unregister(msg)
         end
     elseif msg.phase == 'COMMIT' then
         if nameslocks[msg.name] and
-            nameslocks[msg.name][pid] == msg.pid and
-            nameslocks[msg.name][node] == msg.node then
+            nameslocks[msg.name]['pid'] == msg.pid and
+            nameslocks[msg.name]['node'] == msg.node then
             concurrent._register.unregister(msg.name)
             concurrent.send({ msg.from.pid, msg.from.node }, { phase = 'COMMIT',
                 from = { node = concurrent.node() } })
@@ -244,6 +244,7 @@ function controller_unregister(msg)
         end
     end
 end
+
 
 -- Deletes all registered names from processes in a node to which the connection
 -- is lost.

@@ -229,10 +229,11 @@ function init(node)
     end
 end
 
--- The dispatcher takes care of the main operations to initialize the networking
--- part of the node initialization.  Creates a port to listen to for data, and
--- registers this port to the local port mapper daemon, sets the node's name and
--- adds a handler for any incoming data.  Returns true if successful or false
+-- The dispatcher takes care of the main operations to initialize the
+-- networking part of the node initialization.  Creates a port to listen to for
+-- data, and registers this port to the local port mapper daemon, sets the
+-- node's name, converts registered names to distributed form and adds a
+-- handler for any incoming data.  Returns true if successful or false
 -- otherwise.
 function dispatcher(name)
     local node, host = string.match(name, '^(%a[%w_]*)@(.+)$')
@@ -260,13 +261,20 @@ function dispatcher(name)
 
     nodename = name
 
+    for n, p in pairs(concurrent._register.names) do
+        if type(p) == 'number' then
+            concurrent._register.names[n] = { p, nodename }
+        end
+    end
+
     copas.addserver(server, handler)
 
     return true
 end
 
 -- Shuts down a node by unregistering the node's listening port from the port
--- mapper daemon and by closing all of its active connections to other nodes.
+-- mapper daemon, by closing all of its active connections to other nodes, and
+-- converting the registered names to local form.
 function shutdown()
     if not concurrent.node() then
         return true
@@ -283,6 +291,13 @@ function shutdown()
         concurrent.send({ -1, k }, { subject = 'BYE',
             from = concurrent.node() })
         disconnect(k)
+    end
+
+    for n, pid in pairs(concurrent._register.names) do
+        if type(pid) == 'table' then
+            p, _ = unpack(pid)
+            concurrent._register.names[n] = p
+        end
     end
 
     nodename = nil
